@@ -134,10 +134,13 @@ module InheritedResources
         collection_segments << :"#{collection_segments.pop}_index"
       end
 
-      generate_url_and_path_helpers nil,   :collection, collection_segments, collection_ivars
-      generate_url_and_path_helpers :new,  :resource,   resource_segments,   new_ivars || collection_ivars
-      generate_url_and_path_helpers nil,   :resource,   resource_segments,   resource_ivars
-      generate_url_and_path_helpers :edit, :resource,   resource_segments,   resource_ivars
+      resource_url_helper_name    = resource_config[:resource_url_helper_name]    || :resource
+      collection_url_helper_name  = resource_config[:collection_url_helper_name]  || :collection
+
+      generate_url_and_path_helpers nil,   collection_url_helper_name, collection_segments, collection_ivars
+      generate_url_and_path_helpers :new,  resource_url_helper_name,   resource_segments,   new_ivars || collection_ivars
+      generate_url_and_path_helpers nil,   resource_url_helper_name,   resource_segments,   resource_ivars
+      generate_url_and_path_helpers :edit, resource_url_helper_name,   resource_segments,   resource_ivars
 
       if resource_config[:custom_actions]
         [*resource_config[:custom_actions][:resource]].each do | method |
@@ -227,6 +230,9 @@ module InheritedResources
             given_options = given_args.extract_options!
             #{prefix}#{segments}_url(#{ivars})
           end
+
+          helper_method :#{prefix}#{name}_path
+          helper_method :#{prefix}#{name}_url
       URL_HELPERS
     end
 
