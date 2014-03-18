@@ -314,7 +314,7 @@ module InheritedResources
           url ||= self.send("#{self.class.collection_url_helper_name}_url") rescue nil
         end
         if respond_to? :parent, true
-          url ||= parent_url rescue nil
+          url ||= self.send("#{self.class.parent_url_helper_name}_url") rescue nil
         end
         url ||= root_url rescue nil
       end

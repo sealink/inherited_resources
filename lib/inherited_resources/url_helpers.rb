@@ -48,6 +48,11 @@ module InheritedResources
     end
 
 
+    def parent_url_helper_name
+      self.resources_configuration[:self][:parent_url_helper_name] || :parent
+    end
+
+
     protected
 
     # This method hard code url helpers in the class.
@@ -102,8 +107,8 @@ module InheritedResources
 
       # Generate parent url before we add resource instances.
       unless parents_symbols.empty?
-        generate_url_and_path_helpers nil,   :parent, resource_segments, resource_ivars
-        generate_url_and_path_helpers :edit, :parent, resource_segments, resource_ivars
+        generate_url_and_path_helpers nil,   parent_url_helper_name, resource_segments, resource_ivars
+        generate_url_and_path_helpers :edit, parent_url_helper_name, resource_segments, resource_ivars
       end
 
       # This is the default route configuration, later we have to deal with
@@ -179,7 +184,7 @@ module InheritedResources
           segments = [segments.last]
           ivars = [ivars.last]
         end
-      when :parent
+      when parent_url_helper_name
         segments = [segments.last]
         ivars = [ivars.last]
       end
@@ -203,7 +208,7 @@ module InheritedResources
       # If it's not a singleton, ivars are not empty, not a collection or
       # not a "new" named route, we can pass a resource as argument.
       #
-      unless (singleton && name != :parent) || ivars.empty? || name == collection_url_helper_name || prefix == :new
+      unless (singleton && name != parent_url_helper_name) || ivars.empty? || name == collection_url_helper_name || prefix == :new
         ivars.push "(given_args.first || #{ivars.pop})"
       end
 
