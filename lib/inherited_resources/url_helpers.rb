@@ -39,7 +39,7 @@ module InheritedResources
 
 
     def resources_url_helper_name
-      self.resources_configuration[:self][:resources_url_helper_name] || :resources
+      self.resources_configuration[:self][:resources_url_helper_name] || resource_url_helper_name.to_s.pluralize.to_sym
     end
 
 
