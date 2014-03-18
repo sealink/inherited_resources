@@ -32,6 +32,22 @@ module InheritedResources
   # all created when you inherit.
   #
   module UrlHelpers
+
+    def resource_url_helper_name
+      self.resources_configuration[:self][:resource_url_helper_name] || :resource
+    end
+
+
+    def resources_url_helper_name
+      self.resources_configuration[:self][:resources_url_helper_name] || :resources
+    end
+
+
+    def collection_url_helper_name
+      self.resources_configuration[:self][:collection_url_helper_name] || :collection
+    end
+
+
     protected
 
     # This method hard code url helpers in the class.
@@ -134,9 +150,6 @@ module InheritedResources
         collection_segments << :"#{collection_segments.pop}_index"
       end
 
-      resource_url_helper_name    = resource_config[:resource_url_helper_name]    || :resource
-      collection_url_helper_name  = resource_config[:collection_url_helper_name]  || :collection
-
       generate_url_and_path_helpers nil,   collection_url_helper_name, collection_segments, collection_ivars
       generate_url_and_path_helpers :new,  resource_url_helper_name,   resource_segments,   new_ivars || collection_ivars
       generate_url_and_path_helpers nil,   resource_url_helper_name,   resource_segments,   resource_ivars
@@ -144,10 +157,10 @@ module InheritedResources
 
       if resource_config[:custom_actions]
         [*resource_config[:custom_actions][:resource]].each do | method |
-          generate_url_and_path_helpers method, :resource, resource_segments, resource_ivars
+          generate_url_and_path_helpers method, resource_url_helper_name, resource_segments, resource_ivars
         end
         [*resource_config[:custom_actions][:collection]].each do | method |
-          generate_url_and_path_helpers method, :resources, collection_segments, collection_ivars
+          generate_url_and_path_helpers method, resources_url_helper_name, collection_segments, collection_ivars
         end
       end
     end
@@ -155,10 +168,10 @@ module InheritedResources
     def handle_shallow_resource(prefix, name, segments, ivars) #:nodoc:
       return segments, ivars unless self.resources_configuration[:self][:shallow]
       case name
-      when :collection, :resources
+      when collection_url_helper_name, resources_url_helper_name
         segments = segments[-2..-1]
         ivars = [ivars.last]
-      when :resource
+      when resource_url_helper_name
         if prefix == :new
           segments = segments[-2..-1]
           ivars = [ivars.last]
@@ -190,14 +203,14 @@ module InheritedResources
       # If it's not a singleton, ivars are not empty, not a collection or
       # not a "new" named route, we can pass a resource as argument.
       #
-      unless (singleton && name != :parent) || ivars.empty? || name == :collection || prefix == :new
+      unless (singleton && name != :parent) || ivars.empty? || name == collection_url_helper_name || prefix == :new
         ivars.push "(given_args.first || #{ivars.pop})"
       end
 
       # In collection in polymorphic cases, allow an argument to be given as a
       # replacemente for the parent.
       #
-      if name == :collection && polymorphic
+      if name == collection_url_helper_name && polymorphic
         index = ivars.index(:parent)
         ivars.insert index, "(given_args.first || parent)"
         ivars.delete(:parent)
