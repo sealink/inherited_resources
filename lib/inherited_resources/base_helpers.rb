@@ -294,7 +294,7 @@ module InheritedResources
       def smart_resource_url
         url = nil
         if respond_to? :show
-          url = resource_url rescue nil
+          url = self.send("#{self.class.resource_url_helper_name}_url") rescue nil
         end
         url ||= smart_collection_url
       end
@@ -303,10 +303,10 @@ module InheritedResources
       def smart_collection_url
         url = nil
         if respond_to? :index
-          url ||= collection_url rescue nil
+          url ||= self.send("#{self.class.collection_url_helper_name}_url") rescue nil
         end
         if respond_to? :parent, true
-          url ||= parent_url rescue nil
+          url ||= self.send("#{self.class.parent_url_helper_name}_url") rescue nil
         end
         url ||= root_url rescue nil
       end
