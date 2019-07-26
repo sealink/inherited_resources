@@ -1,4 +1,4 @@
-require File.expand_path('test_helper', File.dirname(__FILE__))
+require 'test_helper'
 
 class Country
 end
@@ -18,18 +18,25 @@ class NestedBelongsToTest < ActionController::TestCase
   tests CitiesController
 
   def setup
+    draw_routes do
+      resources :cities
+    end
+
     Country.expects(:find).with('13').returns(mock_country)
     mock_country.expects(:states).returns(State)
     State.expects(:find).with('37').returns(mock_state)
     mock_state.expects(:cities).returns(City)
 
-    @controller.stubs(:resource_url).returns('/')
     @controller.stubs(:collection_url).returns('/')
   end
 
-  def test_assigns_country_and_state_and_city_on_create
-    City.expects(:find).with(:all).returns([mock_city])
-    get :index, request_params(:state_id => '37', :country_id => '13')
+  def teardown
+    clear_routes
+  end
+
+  def test_assigns_country_and_state_and_city_on_index
+    City.expects(:scoped).returns([mock_city])
+    get :index, params: { state_id: '37', country_id: '13' }
 
     assert_equal mock_country, assigns(:country)
     assert_equal mock_state, assigns(:state)
@@ -38,7 +45,7 @@ class NestedBelongsToTest < ActionController::TestCase
 
   def test_assigns_country_and_state_and_city_on_show
     City.expects(:find).with('42').returns(mock_city)
-    get :show, request_params(:id => '42', :state_id => '37', :country_id => '13')
+    get :show, params: { id: '42', state_id: '37', country_id: '13' }
 
     assert_equal mock_country, assigns(:country)
     assert_equal mock_state, assigns(:state)
@@ -47,7 +54,7 @@ class NestedBelongsToTest < ActionController::TestCase
 
   def test_assigns_country_and_state_and_city_on_new
     City.expects(:build).returns(mock_city)
-    get :new, request_params(:state_id => '37', :country_id => '13')
+    get :new, params: { state_id: '37', country_id: '13' }
 
     assert_equal mock_country, assigns(:country)
     assert_equal mock_state, assigns(:state)
@@ -56,7 +63,7 @@ class NestedBelongsToTest < ActionController::TestCase
 
   def test_assigns_country_and_state_and_city_on_edit
     City.expects(:find).with('42').returns(mock_city)
-    get :edit, request_params(:id => '42', :state_id => '37', :country_id => '13')
+    get :edit, params: { id: '42', state_id: '37', country_id: '13' }
 
     assert_equal mock_country, assigns(:country)
     assert_equal mock_state, assigns(:state)
@@ -66,7 +73,7 @@ class NestedBelongsToTest < ActionController::TestCase
   def test_assigns_country_and_state_and_city_on_create
     City.expects(:build).with({'these' => 'params'}).returns(mock_city)
     mock_city.expects(:save).returns(true)
-    post :create, request_params(:state_id => '37', :country_id => '13', :city => {:these => 'params'})
+    post :create, params: { state_id: '37', country_id: '13', city: {these: 'params'} }
 
     assert_equal mock_country, assigns(:country)
     assert_equal mock_state, assigns(:state)
@@ -76,17 +83,17 @@ class NestedBelongsToTest < ActionController::TestCase
   def test_assigns_country_and_state_and_city_on_update
     City.expects(:find).with('42').returns(mock_city)
     mock_city.expects(:update_attributes).returns(true)
-    put :update, request_params(:id => '42', :state_id => '37', :country_id => '13', :city => {:these => 'params'})
+    put :update, params: { id: '42', state_id: '37', country_id: '13', city: {these: 'params'} }
 
     assert_equal mock_country, assigns(:country)
     assert_equal mock_state, assigns(:state)
     assert_equal mock_city, assigns(:city)
   end
-  
+
   def test_assigns_country_and_state_and_city_on_destroy
     City.expects(:find).with('42').returns(mock_city)
     mock_city.expects(:destroy)
-    delete :destroy, request_params(:id => '42', :state_id => '37', :country_id => '13')
+    delete :destroy, params: { id: '42', state_id: '37', country_id: '13' }
 
     assert_equal mock_country, assigns(:country)
     assert_equal mock_state, assigns(:state)
@@ -94,6 +101,7 @@ class NestedBelongsToTest < ActionController::TestCase
   end
 
   protected
+
     def mock_country(stubs={})
       @mock_country ||= mock(stubs)
     end

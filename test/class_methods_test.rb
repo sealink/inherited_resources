@@ -1,15 +1,15 @@
-require File.expand_path('test_helper', File.dirname(__FILE__))
+require 'test_helper'
 
 class Book; end
 class Folder; end
 
 class BooksController < InheritedResources::Base
-  custom_actions :collection => :search, :resource => [:delete]
+  custom_actions collection: :search, resource: [:delete]
   actions :index, :show
 end
 
 class ReadersController < InheritedResources::Base
-  actions :all, :except => [ :edit, :update ]
+  actions :all, except: [ :edit, :update ]
 end
 
 class FoldersController < InheritedResources::Base
@@ -70,6 +70,16 @@ module EmptyNamespace; end
 class ActionsClassMethodTest < ActionController::TestCase
   tests BooksController
 
+  def setup
+    draw_routes do
+      resources :books
+    end
+  end
+
+  def teardown
+    clear_routes
+  end
+
   def test_cannot_render_actions
     assert_raise AbstractController::ActionNotFound do
       get :new
@@ -99,7 +109,6 @@ class ActionsClassMethodTest < ActionController::TestCase
       assert action_methods.include? action
     end
   end
-
 end
 
 class DefaultsClassMethodTest < ActiveSupport::TestCase
@@ -114,28 +123,28 @@ class DefaultsClassMethodTest < ActiveSupport::TestCase
   end
 
   def test_defaults_can_be_overwriten
-    BooksController.send(:defaults, :resource_class => String, :instance_name => 'string', :collection_name => 'strings')
+    BooksController.send(:defaults, resource_class: String, instance_name: 'string', collection_name: 'strings')
 
     assert_equal String, BooksController.send(:resource_class)
     assert_equal :string, BooksController.send(:resources_configuration)[:self][:instance_name]
     assert_equal :strings, BooksController.send(:resources_configuration)[:self][:collection_name]
 
-    BooksController.send(:defaults, :class_name => 'Fixnum', :instance_name => :fixnum, :collection_name => :fixnums)
+    BooksController.send(:defaults, class_name: 'Integer', instance_name: :integer, collection_name: :integers)
 
-    assert_equal Fixnum, BooksController.send(:resource_class)
-    assert_equal :fixnum, BooksController.send(:resources_configuration)[:self][:instance_name]
-    assert_equal :fixnums, BooksController.send(:resources_configuration)[:self][:collection_name]
+    assert_equal Integer, BooksController.send(:resource_class)
+    assert_equal :integer, BooksController.send(:resources_configuration)[:self][:instance_name]
+    assert_equal :integers, BooksController.send(:resources_configuration)[:self][:collection_name]
   end
 
   def test_defaults_raises_invalid_key
     assert_raise ArgumentError do
-      BooksController.send(:defaults, :boom => String)
+      BooksController.send(:defaults, boom: String)
     end
   end
 
   def test_url_helpers_are_recreated_when_defaults_change
     BooksController.expects(:create_resources_url_helpers!).returns(true).once
-    BooksController.send(:defaults, :instance_name => 'string', :collection_name => 'strings')
+    BooksController.send(:defaults, instance_name: 'string', collection_name: 'strings')
   end
 end
 
@@ -146,13 +155,13 @@ class BelongsToErrorsTest < ActiveSupport::TestCase
     end
 
     assert_raise ArgumentError do
-      DeansController.send(:belongs_to, :nice, :invalid_key => '')
+      DeansController.send(:belongs_to, :nice, invalid_key: '')
     end
   end
 
   def test_belongs_to_raises_an_error_when_multiple_associations_are_given_with_options
     assert_raise ArgumentError do
-      DeansController.send(:belongs_to, :arguments, :with_options, :parent_class => Book)
+      DeansController.send(:belongs_to, :arguments, :with_options, parent_class: Book)
     end
   end
 
@@ -187,7 +196,7 @@ class BelongsToErrorsTest < ActiveSupport::TestCase
   end
 
   def test_belongs_to_for_namespaced_model_sets_parent_class_properly
-    Library::SubcategoriesController.send(:belongs_to, :library, :class_name => 'Library::Base')
+    Library::SubcategoriesController.send(:belongs_to, :library, class_name: 'Library::Base')
     assert_equal Library::Base, Library::SubcategoriesController.resources_configuration[:library][:parent_class]
   end
 
@@ -198,7 +207,6 @@ class BelongsToErrorsTest < ActiveSupport::TestCase
 end
 
 class SpecialCasesClassMethodTest < ActionController::TestCase
-
   def test_resource_class_to_corresponding_model_class
     assert_equal Controller::User, Controller::UsersController.send(:resource_class)
     assert_equal Controller::User, Controller::Admin::UsersController.send(:resource_class)

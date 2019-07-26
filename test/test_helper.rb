@@ -14,18 +14,8 @@ require "active_support"
 require "active_model"
 require "action_controller"
 
-if ActionPack::VERSION::MAJOR >= 5
-  require 'rails-controller-testing'
-  Rails::Controller::Testing.install
-
-  def request_params(params)
-    { params: params }
-  end
-else
-  def request_params(params)
-    params
-  end
-end
+require 'rails-controller-testing'
+Rails::Controller::Testing.install
 
 I18n.load_path << File.join(File.dirname(__FILE__), 'locales', 'en.yml')
 I18n.reload!
@@ -39,11 +29,13 @@ require 'inherited_resources'
 ActionController::Base.view_paths = File.join(File.dirname(__FILE__), 'views')
 
 InheritedResources::Routes = ActionDispatch::Routing::RouteSet.new
-InheritedResources::Routes.draw do
-  get ':controller(/:action(/:id))'
-  get ':controller(/:action)'
-  resources 'posts'
-  root :to => 'posts#index'
+
+def draw_routes(&block)
+  InheritedResources::Routes.draw(&block)
+end
+
+def clear_routes
+  InheritedResources::Routes.draw { }
 end
 
 ActionController::Base.send :include, InheritedResources::Routes.url_helpers

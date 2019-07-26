@@ -9,8 +9,9 @@ If you are not already using Inherited Resources we suggest instead using Rails'
 
 ## Inherited Resources
 
-[![Version](http://img.shields.io/gem/v/inherited_resources.svg)](https://rubygems.org/gems/inherited_resources)
-[![Travis CI](http://img.shields.io/travis/activeadmin/inherited_resources/master.svg)](https://travis-ci.org/activeadmin/inherited_resources)
+[![Version         ][rubygems_badge]][rubygems]
+[![CircleCI        ][circleci_badge]][circleci]
+[![Tidelift        ][tidelift_badge]][tidelift]
 
 Inherited Resources speeds up development by making your controllers inherit
 all restful actions so you just have to focus on what is important. It makes
@@ -723,3 +724,17 @@ If you discover any bugs, please describe it in the issues tracker, including Ra
 Questions are better handled on StackOverflow.
 
 MIT License. Copyright (c) 2009-2017 José Valim.
+
+## Security contact information
+
+Please use the Tidelift security contact to [report a security vulnerability][Tidelift security contact].
+Tidelift will coordinate the fix and disclosure.
+
+[rubygems_badge]: http://img.shields.io/gem/v/inherited_resources.svg
+[rubygems]: https://rubygems.org/gems/inherited_resources
+[circleci_badge]: https://circleci.com/gh/activeadmin/inherited_resources.svg?style=svg
+[circleci]: https://circleci.com/gh/activeadmin/inherited_resources
+[tidelift_badge]: https://tidelift.com/badges/github/activeadmin/inherited_resources
+[tidelift]: https://tidelift.com/subscription/pkg/rubygems-inherited-resources?utm_source=rubygems-inherited-resources&utm_medium=readme
+
+[Tidelift security contact]: https://tidelift.com/security

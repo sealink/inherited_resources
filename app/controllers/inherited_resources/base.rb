@@ -25,8 +25,8 @@ module InheritedResources
                       :resource_instance_name, :resource_collection_name,
                       :smart_resource_url, :smart_collection_url
 
-        self.class_attribute :resource_class, :instance_writer => false unless self.respond_to? :resource_class
-        self.class_attribute :parents_symbols,  :resources_configuration, :instance_writer => false
+        self.class_attribute :resource_class, instance_writer: false unless self.respond_to? :resource_class
+        self.class_attribute :parents_symbols,  :resources_configuration, instance_writer: false
 
         protected :resource_class, :parents_symbols, :resources_configuration,
           :resource_class?, :parents_symbols?, :resources_configuration?

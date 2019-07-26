@@ -1,4 +1,4 @@
-require File.expand_path('test_helper', File.dirname(__FILE__))
+require 'test_helper'
 
 class Pet
   extend ActiveModel::Naming
@@ -10,13 +10,14 @@ end
 
 class PetsController < InheritedResources::Base
   attr_accessor :current_user
-  
+
   def edit
     @pet = 'new pet'
     edit!
   end
 
   protected
+
     def collection
       @pets ||= end_of_association_chain.all
     end
@@ -30,7 +31,15 @@ class BeginOfAssociationChainTest < ActionController::TestCase
   tests PetsController
 
   def setup
+    draw_routes do
+      resources :pets
+    end
+
     @controller.current_user = mock()
+  end
+
+  def teardown
+    clear_routes
   end
 
   def test_begin_of_association_chain_is_called_on_index
@@ -52,7 +61,7 @@ class BeginOfAssociationChainTest < ActionController::TestCase
   def test_begin_of_association_chain_is_called_on_show
     @controller.current_user.expects(:pets).returns(Pet)
     Pet.expects(:find).with('47').returns(mock_pet)
-    get :show, request_params(:id => '47')
+    get :show, params: { id: '47' }
     assert_response :success
     assert_equal 'Show HTML', @response.body.strip
   end
@@ -60,7 +69,7 @@ class BeginOfAssociationChainTest < ActionController::TestCase
   def test_instance_variable_should_not_be_set_if_already_defined
     @controller.current_user.expects(:pets).never
     Pet.expects(:find).never
-    get :edit
+    get :edit, params: { id: '47' }
     assert_response :success
     assert_equal 'new pet', assigns(:pet)
   end
@@ -80,10 +89,10 @@ class BeginOfAssociationChainTest < ActionController::TestCase
   end
 
   protected
+
     def mock_pet(stubs={})
       @mock_pet ||= mock(stubs)
     end
-
 end
 
 class PuppetsController < InheritedResources::Base
@@ -94,8 +103,15 @@ class AssociationChainTest < ActionController::TestCase
   tests PuppetsController
 
   def setup
-    @controller.stubs(:resource_url).returns('/')
+    draw_routes do
+      resources :puppets
+    end
+
     @controller.stubs(:collection_url).returns('/')
+  end
+
+  def teardown
+    clear_routes
   end
 
   def test_parent_is_added_to_association_chain
@@ -103,18 +119,19 @@ class AssociationChainTest < ActionController::TestCase
     mock_pet.expects(:puppets).returns(Puppet)
     Puppet.expects(:find).with('42').returns(mock_puppet)
     mock_puppet.expects(:destroy)
-    delete :destroy, request_params(:id => '42', :pet_id => '37')
+    delete :destroy, params: { id: '42', pet_id: '37' }
     assert_equal [mock_pet], @controller.send(:association_chain)
   end
 
   def test_parent_is_added_to_association_chain_if_not_available
     Puppet.expects(:find).with('42').returns(mock_puppet)
     mock_puppet.expects(:destroy)
-    delete :destroy, request_params(:id => '42')
+    delete :destroy, params: { id: '42' }
     assert_equal [], @controller.send(:association_chain)
   end
 
   protected
+
     def mock_pet(stubs={})
       @mock_pet ||= mock(stubs)
     end

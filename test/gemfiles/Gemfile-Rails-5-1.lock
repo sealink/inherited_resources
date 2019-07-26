@@ -1,5 +1,5 @@
 PATH
-  remote: .
+  remote: ../..
   specs:
     inherited_resources (1.10.0)
       actionpack (>= 5.0, < 6.0)
@@ -180,7 +180,7 @@ DEPENDENCIES
   inherited_resources!
   minitest-rg
   mocha
-  rails (~> 5.2.a)
+  rails (~> 5.1.a)
   rails-controller-testing
   rubocop
 

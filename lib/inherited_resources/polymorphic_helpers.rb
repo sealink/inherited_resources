@@ -102,11 +102,13 @@ module InheritedResources
       # as parent types.
       #
       def parent_type
-        unless @parent_type
+        unless instance_variable_defined?(:@parent_type)
           symbols_for_association_chain
         end
 
-        @parent_type
+        if instance_variable_defined?(:@parent_type)
+          @parent_type
+        end
       end
 
       def parent_class
@@ -118,7 +120,7 @@ module InheritedResources
       #
       def parent
         if parent_type
-          p = instance_variable_get("@#{parent_type}")
+          p = instance_variable_defined?("@#{parent_type}") && instance_variable_get("@#{parent_type}")
           p || instance_variable_set("@#{parent_type}", association_chain[-1])
         end
       end
@@ -161,7 +163,7 @@ module InheritedResources
               nil
             else
               @parent_type = keys[-1].to_sym
-							@parent_types = keys.map(&:to_sym)
+              @parent_types = keys.map(&:to_sym)
             end
           else
             symbol
@@ -171,4 +173,3 @@ module InheritedResources
 
   end
 end
-

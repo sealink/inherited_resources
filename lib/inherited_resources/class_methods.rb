@@ -160,7 +160,10 @@ module InheritedResources
         polymorphic = options.delete(:polymorphic)
         finder      = options.delete(:finder)
 
-        include BelongsToHelpers if self.parents_symbols.empty?
+        if self.parents_symbols.empty?
+          include BelongsToHelpers
+          helper_method :parent, :parent?
+        end
 
         acts_as_polymorphic! if polymorphic || optional
         acts_as_shallow!     if shallow
@@ -226,7 +229,6 @@ module InheritedResources
         else
           create_resources_url_helpers!
         end
-        helper_method :parent, :parent?
       end
       alias :nested_belongs_to :belongs_to
 
@@ -234,7 +236,7 @@ module InheritedResources
       #
       def polymorphic_belongs_to(*symbols, &block)
         options = symbols.extract_options!
-        options.merge!(:polymorphic => true)
+        options.merge!(polymorphic: true)
         belongs_to(*symbols, options, &block)
       end
 
@@ -242,7 +244,7 @@ module InheritedResources
       #
       def singleton_belongs_to(*symbols, &block)
         options = symbols.extract_options!
-        options.merge!(:singleton => true)
+        options.merge!(singleton: true)
         belongs_to(*symbols, options, &block)
       end
 
@@ -250,7 +252,7 @@ module InheritedResources
       #
       def optional_belongs_to(*symbols, &block)
         options = symbols.extract_options!
-        options.merge!(:optional => true)
+        options.merge!(optional: true)
         belongs_to(*symbols, options, &block)
       end
 
@@ -304,7 +306,7 @@ module InheritedResources
         unless self.resources_configuration[:self][:singleton]
           self.resources_configuration[:self][:singleton] = true
           include SingletonHelpers
-          actions :all, :except => :index
+          actions :all, except: :index
         end
       end
 
@@ -394,7 +396,7 @@ module InheritedResources
         config[:request_name] = self.resource_class.to_s.underscore.gsub('/', '_')
 
         # Initialize polymorphic, singleton, scopes and belongs_to parameters
-        polymorphic = self.resources_configuration[:polymorphic] || { :symbols => [], :optional => false }
+        polymorphic = self.resources_configuration[:polymorphic] || { symbols: [], optional: false }
         polymorphic[:symbols] = polymorphic[:symbols].dup
         self.resources_configuration[:polymorphic] = polymorphic
       end

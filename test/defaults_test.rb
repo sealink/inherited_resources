@@ -1,4 +1,4 @@
-require File.expand_path('test_helper', File.dirname(__FILE__))
+require 'test_helper'
 
 class Malarz
   def self.human_name; 'Painter'; end
@@ -9,17 +9,22 @@ class Malarz
 end
 
 class PaintersController < InheritedResources::Base
-  defaults :instance_name => 'malarz', :collection_name => 'malarze',
-           :resource_class => Malarz, :route_prefix => nil,
-           :finder => :find_by_slug
+  defaults instance_name: 'malarz', collection_name: 'malarze',
+           resource_class: Malarz, route_prefix: nil,
+           finder: :find_by_slug
 end
 
 class DefaultsTest < ActionController::TestCase
   tests PaintersController
 
   def setup
-    @controller.stubs(:resource_url).returns('/')
-    @controller.stubs(:collection_url).returns('/')
+    draw_routes do
+      resources :painters
+    end
+  end
+
+  def teardown
+    clear_routes
   end
 
   def test_expose_all_painters_as_instance_variable
@@ -30,7 +35,7 @@ class DefaultsTest < ActionController::TestCase
 
   def test_expose_the_requested_painter_on_show
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
-    get :show, request_params(:id => 'forty_two')
+    get :show, params: { id: 'forty_two' }
     assert_equal mock_painter, assigns(:malarz)
   end
 
@@ -42,101 +47,110 @@ class DefaultsTest < ActionController::TestCase
 
   def test_expose_the_requested_painter_on_edit
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
-    get :edit, request_params(:id => 'forty_two')
+    get :edit, params: { id: 'forty_two' }
     assert_response :success
     assert_equal mock_painter, assigns(:malarz)
   end
 
   def test_expose_a_newly_create_painter_when_saved_with_success
-    Malarz.expects(:new).with({'these' => 'params'}).returns(mock_painter(:save => true))
-    post :create, request_params(:malarz => {:these => 'params'})
+    Malarz.expects(:new).with({'these' => 'params'}).returns(mock_painter(save: true))
+    post :create, params: { malarz: {these: 'params'} }
     assert_equal mock_painter, assigns(:malarz)
   end
 
   def test_update_the_requested_object
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
     mock_painter.expects(:update_attributes).with({'these' => 'params'}).returns(true)
-    put :update, request_params(:id => 'forty_two', :malarz => {:these => 'params'})
+    put :update, params: { id: 'forty_two', malarz: {these: 'params'} }
     assert_equal mock_painter, assigns(:malarz)
   end
 
   def test_the_requested_painter_is_destroyed
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
     mock_painter.expects(:destroy)
-    delete :destroy, request_params(:id => 'forty_two')
+    delete :destroy, params: { id: 'forty_two' }
     assert_equal mock_painter, assigns(:malarz)
   end
 
   protected
+
     def mock_painter(stubs={})
       @mock_painter ||= mock(stubs)
     end
 end
 
-class Professor
+class Lecturer
   def self.human_name; 'Einstein'; end
 end
 module University; end
-class University::ProfessorsController < InheritedResources::Base
-  defaults :finder => :find_by_slug
+class University::LecturersController < InheritedResources::Base
+  defaults finder: :find_by_slug
 end
 
 class DefaultsNamespaceTest < ActionController::TestCase
-  tests University::ProfessorsController
+  tests University::LecturersController
 
   def setup
-    @controller.stubs(:resource_url).returns('/')
-    @controller.stubs(:collection_url).returns('/')
+    draw_routes do
+      namespace :university do
+        resources :lecturers
+      end
+    end
   end
 
-  def test_expose_all_professors_as_instance_variable
-    Professor.expects(:scoped).returns([mock_professor])
+  def teardown
+    clear_routes
+  end
+
+  def test_expose_all_lecturers_as_instance_variable
+    Lecturer.expects(:scoped).returns([mock_lecturer])
     get :index
-    assert_equal [mock_professor], assigns(:professors)
+    assert_equal [mock_lecturer], assigns(:lecturers)
   end
 
-  def test_expose_the_requested_painter_on_show
-    Professor.expects(:find_by_slug).with('forty_two').returns(mock_professor)
-    get :show, request_params(:id => 'forty_two')
-    assert_equal mock_professor, assigns(:professor)
+  def test_expose_the_requested_lecturer_on_show
+    Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
+    get :show, params: { id: 'forty_two' }
+    assert_equal mock_lecturer, assigns(:lecturer)
   end
 
-  def test_expose_a_new_painter
-    Professor.expects(:new).returns(mock_professor)
+  def test_expose_a_new_lecturer
+    Lecturer.expects(:new).returns(mock_lecturer)
     get :new
-    assert_equal mock_professor, assigns(:professor)
+    assert_equal mock_lecturer, assigns(:lecturer)
   end
 
-  def test_expose_the_requested_painter_on_edit
-    Professor.expects(:find_by_slug).with('forty_two').returns(mock_professor)
-    get :edit, request_params(:id => 'forty_two')
+  def test_expose_the_requested_lecturer_on_edit
+    Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
+    get :edit, params: { id: 'forty_two' }
     assert_response :success
-    assert_equal mock_professor, assigns(:professor)
+    assert_equal mock_lecturer, assigns(:lecturer)
   end
 
-  def test_expose_a_newly_create_professor_when_saved_with_success
-    Professor.expects(:new).with({'these' => 'params'}).returns(mock_professor(:save => true))
-    post :create, request_params(:professor => {:these => 'params'})
-    assert_equal mock_professor, assigns(:professor)
+  def test_expose_a_newly_create_lecturer_when_saved_with_success
+    Lecturer.expects(:new).with({'these' => 'params'}).returns(mock_lecturer(save: true))
+    post :create, params: { lecturer: {these: 'params'} }
+    assert_equal mock_lecturer, assigns(:lecturer)
   end
 
-  def test_update_the_professor
-    Professor.expects(:find_by_slug).with('forty_two').returns(mock_professor)
-    mock_professor.expects(:update_attributes).with({'these' => 'params'}).returns(true)
-    put :update, request_params(:id => 'forty_two', :professor => {:these => 'params'})
-    assert_equal mock_professor, assigns(:professor)
+  def test_update_the_lecturer
+    Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
+    mock_lecturer.expects(:update_attributes).with({'these' => 'params'}).returns(true)
+    put :update, params: { id: 'forty_two', lecturer: {these: 'params'} }
+    assert_equal mock_lecturer, assigns(:lecturer)
   end
 
-  def test_the_requested_painter_is_destroyed
-    Professor.expects(:find_by_slug).with('forty_two').returns(mock_professor)
-    mock_professor.expects(:destroy)
-    delete :destroy, request_params(:id => 'forty_two')
-    assert_equal mock_professor, assigns(:professor)
+  def test_the_requested_lecturer_is_destroyed
+    Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
+    mock_lecturer.expects(:destroy)
+    delete :destroy, params: { id: 'forty_two' }
+    assert_equal mock_lecturer, assigns(:lecturer)
   end
 
   protected
-    def mock_professor(stubs={})
-      @mock_professor ||= mock(stubs)
+
+    def mock_lecturer(stubs={})
+      @mock_lecturer ||= mock(stubs)
     end
 end
 
@@ -179,7 +193,7 @@ class User
 end
 class Admin::UsersController < InheritedResources::Base
 end
-class TwoPartNameModelForNamespacedController < ActionController::TestCase
+class AnotherTwoPartNameModelForNamespacedController < ActionController::TestCase
   tests Admin::UsersController
 
   def setup

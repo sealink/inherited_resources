@@ -1,4 +1,4 @@
-require File.expand_path('test_helper', File.dirname(__FILE__))
+require 'test_helper'
 
 class Brands; end
 class Category; end
@@ -8,22 +8,29 @@ class Product
 end
 
 class ProductsController < InheritedResources::Base
-  belongs_to :brand, :category, :polymorphic => true, :optional => true
+  belongs_to :brand, :category, polymorphic: true, optional: true
 end
 
 class OptionalTest < ActionController::TestCase
   tests ProductsController
 
   def setup
+    draw_routes do
+      resources :products
+    end
+
     @controller.stubs(:resource_url).returns('/')
-    @controller.stubs(:collection_url).returns('/')
+  end
+
+  def teardown
+    clear_routes
   end
 
   def test_expose_all_products_as_instance_variable_with_category
     Category.expects(:find).with('37').returns(mock_category)
     mock_category.expects(:products).returns(Product)
     Product.expects(:scoped).returns([mock_product])
-    get :index, request_params(:category_id => '37')
+    get :index, params: { category_id: '37' }
     assert_equal mock_category, assigns(:category)
     assert_equal [mock_product], assigns(:products)
   end
@@ -39,14 +46,14 @@ class OptionalTest < ActionController::TestCase
     Category.expects(:find).with('37').returns(mock_category)
     mock_category.expects(:products).returns(Product)
     Product.expects(:find).with('42').returns(mock_product)
-    get :show, request_params(:id => '42', :category_id => '37')
+    get :show, params: { id: '42', category_id: '37' }
     assert_equal mock_category, assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
 
   def test_expose_the_requested_product_without_category
     Product.expects(:find).with('42').returns(mock_product)
-    get :show, request_params(:id => '42')
+    get :show, params: { id: '42' }
     assert_nil assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -55,7 +62,7 @@ class OptionalTest < ActionController::TestCase
     Category.expects(:find).with('37').returns(mock_category)
     mock_category.expects(:products).returns(Product)
     Product.expects(:build).returns(mock_product)
-    get :new, request_params(:category_id => '37')
+    get :new, params: { category_id: '37' }
     assert_equal mock_category, assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -71,14 +78,14 @@ class OptionalTest < ActionController::TestCase
     Category.expects(:find).with('37').returns(mock_category)
     mock_category.expects(:products).returns(Product)
     Product.expects(:find).with('42').returns(mock_product)
-    get :edit, request_params(:id => '42', :category_id => '37')
+    get :edit, params: { id: '42', category_id: '37' }
     assert_equal mock_category, assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
 
   def test_expose_the_requested_product_for_edition_without_category
     Product.expects(:find).with('42').returns(mock_product)
-    get :edit, request_params(:id => '42')
+    get :edit, params: { id: '42' }
     assert_nil assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -86,15 +93,15 @@ class OptionalTest < ActionController::TestCase
   def test_expose_a_newly_create_product_with_category
     Category.expects(:find).with('37').returns(mock_category)
     mock_category.expects(:products).returns(Product)
-    Product.expects(:build).with({'these' => 'params'}).returns(mock_product(:save => true))
-    post :create, request_params(:category_id => '37', :product => {:these => 'params'})
+    Product.expects(:build).with({'these' => 'params'}).returns(mock_product(save: true))
+    post :create, params: { category_id: '37', product: {these: 'params'} }
     assert_equal mock_category, assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
 
   def test_expose_a_newly_create_product_without_category
-    Product.expects(:new).with({'these' => 'params'}).returns(mock_product(:save => true))
-    post :create, request_params(:product => {:these => 'params'})
+    Product.expects(:new).with({'these' => 'params'}).returns(mock_product(save: true))
+    post :create, params: { product: {these: 'params'} }
     assert_nil assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -105,7 +112,7 @@ class OptionalTest < ActionController::TestCase
     Product.expects(:find).with('42').returns(mock_product)
     mock_product.expects(:update_attributes).with({'these' => 'params'}).returns(true)
 
-    put :update, request_params(:id => '42', :category_id => '37', :product => {:these => 'params'})
+    put :update, params: { id: '42', category_id: '37', product: {these: 'params'} }
     assert_equal mock_category, assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -114,7 +121,7 @@ class OptionalTest < ActionController::TestCase
     Product.expects(:find).with('42').returns(mock_product)
     mock_product.expects(:update_attributes).with({'these' => 'params'}).returns(true)
 
-    put :update, request_params(:id => '42', :product => {:these => 'params'})
+    put :update, params: { id: '42', product: {these: 'params'} }
     assert_nil assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -126,7 +133,7 @@ class OptionalTest < ActionController::TestCase
     mock_product.expects(:destroy).returns(true)
     @controller.expects(:collection_url).returns('/')
 
-    delete :destroy, request_params(:id => '42', :category_id => '37')
+    delete :destroy, params: { id: '42', category_id: '37' }
     assert_equal mock_category, assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -136,7 +143,7 @@ class OptionalTest < ActionController::TestCase
     mock_product.expects(:destroy).returns(true)
     @controller.expects(:collection_url).returns('/')
 
-    delete :destroy, request_params(:id => '42')
+    delete :destroy, params: { id: '42' }
     assert_nil assigns(:category)
     assert_equal mock_product, assigns(:product)
   end
@@ -154,6 +161,7 @@ class OptionalTest < ActionController::TestCase
   end
 
   protected
+
     def mock_category(stubs={})
       @mock_category ||= mock(stubs)
     end
