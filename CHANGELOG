@@ -1,8 +1,16 @@
+# Version 1.7.1
+
+* Fix regression with `get_resource_ivar` that was returning `false`
+  instead of `nil` when the value was not set.
+* Do not load `ActionController::Base` on boot time.
+
 # Version 1.7.0
 
 * Support Rails 5
 * Remove support for Ruby < 2.1
 * Fix URL helpers on mountable engines
+* Allow support to has_scope > 0.6 and < 1.0. Users are now able to choose which
+  version they want to use in their applications.
 
 # Version 1.6.0
 
