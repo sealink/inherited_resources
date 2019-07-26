@@ -59,7 +59,11 @@ module InheritedResources
         config[:collection_url_helper_name] = options.delete(:collection_url_helper_name) if options.key?(:collection_url_helper_name)
 
         if options.key?(:resource_class) or options.key?(:class_name)
-          config[:request_name] = self.resource_class.to_s.underscore.gsub('/', '_')
+          config[:request_name] = begin
+            request_name = self.resource_class
+            request_name = request_name.model_name.param_key if request_name.respond_to?(:model_name)
+            request_name.to_s.underscore.gsub('/', '_')
+          end
           options.delete(:resource_class) and options.delete(:class_name)
         end
 
@@ -183,7 +187,7 @@ module InheritedResources
           config[:parent_class] = options.delete(:parent_class) ||
             begin
               class_name = if options[:class_name]
-                options.delete(:class_name).to_s.pluralize.classify
+                options.delete(:class_name)
               else
                 namespace = self.name.deconstantize
                 model_name = symbol.to_s.pluralize.classify
