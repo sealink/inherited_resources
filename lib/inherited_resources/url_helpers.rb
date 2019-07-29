@@ -106,8 +106,8 @@ module InheritedResources
 
         # Generate parent url before we add resource instances.
         unless parents_symbols.empty?
-          generate_url_and_path_helpers nil,   parent_url_helper_nam, :parent, resource_segments, resource_ivars
-          generate_url_and_path_helpers :edit, parent_url_helper_nam, :parent, resource_segments, resource_ivars
+          generate_url_and_path_helpers nil,   parent_url_helper_name, resource_segments, resource_ivars
+          generate_url_and_path_helpers :edit, parent_url_helper_name, resource_segments, resource_ivars
         end
 
         # In singleton cases, we do not send the current element instance variable
@@ -151,10 +151,10 @@ module InheritedResources
 
         if resource_config[:custom_actions]
           [*resource_config[:custom_actions][:resource]].each do | method |
-            generate_url_and_path_helpers method, resource_url_helper_name, :resource, resource_segments, resource_ivars
+            generate_url_and_path_helpers method, resource_url_helper_name, resource_segments, resource_ivars
           end
           [*resource_config[:custom_actions][:collection]].each do | method |
-            generate_url_and_path_helpers method, collection_url_helper_name, :resources, collection_segments, collection_ivars
+            generate_url_and_path_helpers method, resources_url_helper_name, collection_segments, collection_ivars
           end
         end
       end
