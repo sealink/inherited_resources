@@ -37,21 +37,17 @@ module InheritedResources
       self.resources_configuration[:self][:resource_url_helper_name] || :resource
     end
 
-
     def resources_url_helper_name
       self.resources_configuration[:self][:resources_url_helper_name] || resource_url_helper_name.to_s.pluralize.to_sym
     end
-
 
     def collection_url_helper_name
       self.resources_configuration[:self][:collection_url_helper_name] || :collection
     end
 
-
     def parent_url_helper_name
       self.resources_configuration[:self][:parent_url_helper_name] || :parent
     end
-
 
     protected
 
@@ -257,7 +253,10 @@ module InheritedResources
           given_args = send params_method_name, *given_args
           send segments_method, *given_args
         end
+
+        helper_method :"#{method_name}"
         protected method_name
       end
+
   end
 end
