@@ -28,6 +28,10 @@ module InheritedResources
       # * <tt>:route_prefix</tt> - The route prefix which is automically set in namespaced
       #                            controllers. Default to :admin on Admin::ProjectsController.
       #
+      # * <tt>:resource_url_helper_name</tt> - The route url helper method name. Defaults to :route
+      #
+      # * <tt>:collection_url_helper_name</tt> - The collection url helper method name. Defaults to :collection
+      #
       # * <tt>:singleton</tt> - Tells if this controller is singleton or not.
       #
       # * <tt>:finder</tt> - Specifies which method should be called to instantiate the resource.
@@ -40,7 +44,8 @@ module InheritedResources
         options.symbolize_keys!
         options.assert_valid_keys(:resource_class, :collection_name, :instance_name,
                                   :class_name, :route_prefix, :route_collection_name,
-                                  :route_instance_name, :singleton, :finder)
+                                  :route_instance_name, :singleton, :finder,
+                                  :resource_url_helper_name, :collection_url_helper_name)
 
         self.resource_class = options[:resource_class] if options.key?(:resource_class)
         self.resource_class = options[:class_name].constantize if options.key?(:class_name)
@@ -48,6 +53,9 @@ module InheritedResources
         acts_as_singleton! if options.delete(:singleton)
 
         config = self.resources_configuration[:self]
+
+        config[:resource_url_helper_name]   = options.delete(:resource_url_helper_name)   if options.key?(:resource_url_helper_name)
+        config[:collection_url_helper_name] = options.delete(:collection_url_helper_name) if options.key?(:collection_url_helper_name)
 
         if options.key?(:resource_class) or options.key?(:class_name)
           config[:request_name] = begin

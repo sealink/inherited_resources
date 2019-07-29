@@ -32,6 +32,23 @@ module InheritedResources
   # all created when you inherit.
   #
   module UrlHelpers
+
+    def resource_url_helper_name
+      self.resources_configuration[:self][:resource_url_helper_name] || :resource
+    end
+
+    def resources_url_helper_name
+      self.resources_configuration[:self][:resources_url_helper_name] || resource_url_helper_name.to_s.pluralize.to_sym
+    end
+
+    def collection_url_helper_name
+      self.resources_configuration[:self][:collection_url_helper_name] || :collection
+    end
+
+    def parent_url_helper_name
+      self.resources_configuration[:self][:parent_url_helper_name] || :parent
+    end
+
     protected
 
       # This method hard code url helpers in the class.
@@ -85,8 +102,8 @@ module InheritedResources
 
         # Generate parent url before we add resource instances.
         unless parents_symbols.empty?
-          generate_url_and_path_helpers nil,   :parent, resource_segments, resource_ivars
-          generate_url_and_path_helpers :edit, :parent, resource_segments, resource_ivars
+          generate_url_and_path_helpers nil,   parent_url_helper_name, resource_segments, resource_ivars
+          generate_url_and_path_helpers :edit, parent_url_helper_name, resource_segments, resource_ivars
         end
 
         # In singleton cases, we do not send the current element instance variable
@@ -123,17 +140,17 @@ module InheritedResources
           collection_segments << :"#{collection_segments.pop}_index"
         end
 
-        generate_url_and_path_helpers nil,   :collection, collection_segments, collection_ivars
-        generate_url_and_path_helpers :new,  :resource,   resource_segments,   new_ivars || collection_ivars
-        generate_url_and_path_helpers nil,   :resource,   resource_segments,   resource_ivars
-        generate_url_and_path_helpers :edit, :resource,   resource_segments,   resource_ivars
+        generate_url_and_path_helpers nil,   collection_url_helper_name, collection_segments, collection_ivars
+        generate_url_and_path_helpers :new,  resource_url_helper_name,   resource_segments,   new_ivars || collection_ivars
+        generate_url_and_path_helpers nil,   resource_url_helper_name,   resource_segments,   resource_ivars
+        generate_url_and_path_helpers :edit, resource_url_helper_name,   resource_segments,   resource_ivars
 
         if resource_config[:custom_actions]
           [*resource_config[:custom_actions][:resource]].each do | method |
-            generate_url_and_path_helpers method, :resource, resource_segments, resource_ivars
+            generate_url_and_path_helpers method, resource_url_helper_name, resource_segments, resource_ivars
           end
           [*resource_config[:custom_actions][:collection]].each do | method |
-            generate_url_and_path_helpers method, :resources, collection_segments, collection_ivars
+            generate_url_and_path_helpers method, resources_url_helper_name, collection_segments, collection_ivars
           end
         end
       end
@@ -141,10 +158,10 @@ module InheritedResources
       def handle_shallow_resource(prefix, name, segments, ivars) #:nodoc:
         return segments, ivars unless self.resources_configuration[:self][:shallow]
         case name
-        when :collection, :resources
+        when collection_url_helper_name, resources_url_helper_name
           segments = segments[-2..-1]
           ivars = [ivars.last]
-        when :resource
+        when resource_url_helper_name
           if prefix == :new
             segments = segments[-2..-1]
             ivars = [ivars.last]
@@ -152,7 +169,7 @@ module InheritedResources
             segments = [segments.last]
             ivars = [ivars.last]
           end
-        when :parent
+        when parent_url_helper_name
           segments = [segments.last]
           ivars = [ivars.last]
         end
@@ -236,6 +253,8 @@ module InheritedResources
           given_args = send params_method_name, *given_args
           send segments_method, *given_args
         end
+
+        helper_method :"#{method_name}"
         protected method_name
       end
 
