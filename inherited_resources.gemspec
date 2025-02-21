@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "inherited_resources/version"
@@ -19,10 +20,12 @@ Gem::Specification.new do |s|
   s.files         = Dir["app/**/*", "lib/**/*", "README.md", "MIT-LICENSE"]
   s.require_paths = ["lib"]
 
-  s.required_ruby_version = '>= 2.5'
+  s.metadata = { "rubygems_mfa_required" => "true" }
 
-  s.add_dependency("responders", ">= 2", "< 4")
-  s.add_dependency("actionpack", ">= 5.2", "< 7.1")
-  s.add_dependency("railties", ">= 5.2", "< 7.1")
-  s.add_dependency("has_scope",  "~> 0.6")
+  s.required_ruby_version = '>= 3.1'
+
+  s.add_dependency("responders", ">= 2")
+  s.add_dependency("actionpack", ">= 7.0")
+  s.add_dependency("railties", ">= 7.0")
+  s.add_dependency("has_scope",  ">= 0.6")
 end

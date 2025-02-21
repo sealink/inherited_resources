@@ -1,3 +1,15 @@
+# frozen_string_literal: true
+if ENV.fetch('COVERAGE', false)
+  require 'simplecov'
+  require 'simplecov-cobertura'
+  SimpleCov.start do
+    add_filter %r{^/test/}
+    minimum_coverage 98
+    maximum_coverage_drop 0.2
+    formatter SimpleCov::Formatter::CoberturaFormatter
+  end
+end
+
 require 'rubygems'
 require 'bundler'
 
@@ -5,7 +17,8 @@ Bundler.setup
 
 require 'minitest/autorun'
 require 'mocha/minitest'
-require 'minitest/rg'
+require 'minitest/autorun'
+require 'minitest/reporters'
 
 ENV["RAILS_ENV"] = "test"
 RAILS_ROOT = "anywhere"
@@ -13,6 +26,10 @@ RAILS_ROOT = "anywhere"
 require "active_support"
 require "active_model"
 require "action_controller"
+
+# TODO: Remove warning gem and the following lines when freerange/mocha#593 will be fixed
+require "warning"
+Warning.ignore(/Mocha deprecation warning .+ expected keyword arguments .+ but received positional hash/)
 
 require 'rails-controller-testing'
 Rails::Controller::Testing.install

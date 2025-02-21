@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'test_helper'
 
 class ChangelogTest < ActiveSupport::TestCase
@@ -8,6 +9,7 @@ class ChangelogTest < ActiveSupport::TestCase
 
   def test_has_definitions_for_all_implicit_links
     implicit_link_names = @changelog.scan(/\[([^\]]+)\]\[\]/).flatten.uniq
+
     implicit_link_names.each do |name|
       assert_includes @changelog, "[#{name}]: https"
     end
@@ -18,7 +20,7 @@ class ChangelogTest < ActiveSupport::TestCase
     entries = lines.grep(/^\*/)
 
     entries.each do |entry|
-      assert_match(/(\.|\:)$/, entry)
+      assert_no_match(/(\.|\:)$/, entry)
     end
   end
 end

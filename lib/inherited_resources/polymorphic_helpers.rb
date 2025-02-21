@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module InheritedResources
 
   # = polymorphic associations
@@ -120,8 +122,8 @@ module InheritedResources
       #
       def parent
         if parent_type
-          p = instance_variable_defined?("@#{parent_type}") && instance_variable_get("@#{parent_type}")
-          p || instance_variable_set("@#{parent_type}", association_chain[-1])
+          p = instance_variable_defined?(:"@#{parent_type}") && instance_variable_get(:"@#{parent_type}")
+          p || instance_variable_set(:"@#{parent_type}", association_chain[-1])
         end
       end
 
@@ -151,9 +153,9 @@ module InheritedResources
           if symbol == :polymorphic
             params_keys = params.keys
 
-            keys = polymorphic_config[:symbols].map do |poly|
-              params_keys.include?(resources_configuration[poly][:param].to_s) ? poly : nil
-            end.compact
+            keys = polymorphic_config[:symbols].select do |poly|
+              params_keys.include?(resources_configuration[poly][:param].to_s)
+            end
 
             if keys.empty?
               raise ScriptError, "Could not find param for polymorphic association. The request " <<

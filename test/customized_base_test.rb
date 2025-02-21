@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'test_helper'
 
 class Car
@@ -68,6 +69,10 @@ module CarTestHelper
         car
       end
     end
+
+    def build_parameters(hash)
+      ActionController::Parameters.new(hash)
+    end
 end
 
 class IndexActionCustomizedBaseTest < ActionController::TestCase
@@ -76,6 +81,7 @@ class IndexActionCustomizedBaseTest < ActionController::TestCase
   def test_expose_all_users_as_instance_variable
     Car.expects(:get_all).returns([mock_car])
     get :index
+
     assert_equal [mock_car], assigns(:cars)
   end
 end
@@ -86,6 +92,7 @@ class ShowActionCustomizedBaseTest < ActionController::TestCase
   def test_expose_the_requested_user
     Car.expects(:get).with('42').returns(mock_car)
     get :show, params: { id: '42' }
+
     assert_equal mock_car, assigns(:car)
   end
 end
@@ -96,6 +103,7 @@ class NewActionCustomizedBaseTest < ActionController::TestCase
   def test_expose_a_new_user
     Car.expects(:create_new).returns(mock_car)
     get :new
+
     assert_equal mock_car, assigns(:car)
   end
 end
@@ -106,6 +114,7 @@ class EditActionCustomizedBaseTest < ActionController::TestCase
   def test_expose_the_requested_user
     Car.expects(:get).with('42').returns(mock_car)
     get :edit, params: { id: '42' }
+
     assert_response :success
     assert_equal mock_car, assigns(:car)
   end
@@ -115,8 +124,9 @@ class CreateActionCustomizedBaseTest < ActionController::TestCase
   include CarTestHelper
 
   def test_expose_a_newly_create_user_when_saved_with_success
-    Car.expects(:create_new).with({'these' => 'params'}).returns(mock_car(save_successfully: true))
+    Car.expects(:create_new).with(build_parameters({'these' => 'params'})).returns(mock_car(save_successfully: true))
     post :create, params: { car: {these: 'params'} }
+
     assert_equal mock_car, assigns(:car)
   end
 
@@ -124,13 +134,15 @@ class CreateActionCustomizedBaseTest < ActionController::TestCase
     Car.stubs(:create_new).returns(mock_car(save_successfully: true))
     @controller.expects(:resource_url).returns('http://test.host/')
     post :create
+
     assert_redirected_to 'http://test.host/'
   end
 
   def test_render_new_template_when_user_cannot_be_saved
     Car.stubs(:create_new).returns(mock_car(save_successfully: false, errors: {some: :error}))
     post :create
-    assert_response :success
+
+    assert_response :unprocessable_entity
     assert_equal "New HTML", @response.body.strip
   end
 end
@@ -140,8 +152,9 @@ class UpdateActionCustomizedBaseTest < ActionController::TestCase
 
   def test_update_the_requested_object
     Car.expects(:get).with('42').returns(mock_car)
-    mock_car.expects(:update_successfully).with({'these' => 'params'}).returns(true)
+    mock_car.expects(:update_successfully).with(build_parameters({'these' => 'params'})).returns(true)
     put :update, params: { id: '42', car: {these: 'params'} }
+
     assert_equal mock_car, assigns(:car)
   end
 
@@ -149,13 +162,15 @@ class UpdateActionCustomizedBaseTest < ActionController::TestCase
     Car.stubs(:get).returns(mock_car(update_successfully: true))
     @controller.expects(:resource_url).returns('http://test.host/')
     put :update, params: { id: '42' }
+
     assert_redirected_to 'http://test.host/'
   end
 
   def test_render_edit_template_when_user_cannot_be_saved
     Car.stubs(:get).returns(mock_car(update_successfully: false, errors: {some: :error}))
     put :update, params: { id: '42' }
-    assert_response :success
+
+    assert_response :unprocessable_entity
     assert_equal "Edit HTML", @response.body.strip
   end
 end
@@ -167,18 +182,21 @@ class DestroyActionCustomizedBaseTest < ActionController::TestCase
     Car.expects(:get).with('42').returns(mock_car)
     mock_car.expects(:destroy_successfully)
     delete :destroy, params: { id: '42' }
+
     assert_equal mock_car, assigns(:car)
   end
 
   def test_show_flash_message_when_user_can_be_deleted
     Car.stubs(:get).returns(mock_car(destroy_successfully: true))
     delete :destroy, params: { id: '42' }
-    assert_equal flash[:notice], 'Car was successfully destroyed.'
+
+    assert_equal 'Car was successfully destroyed.', flash[:notice]
   end
 
   def test_show_flash_message_when_cannot_be_deleted
     Car.stubs(:get).returns(mock_car(destroy_successfully: false, errors: { fail: true }))
     delete :destroy, params: { id: '42' }
-    assert_equal flash[:alert], 'Car could not be destroyed.'
+
+    assert_equal 'Car could not be destroyed.', flash[:alert]
   end
 end

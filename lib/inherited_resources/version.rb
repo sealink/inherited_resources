@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module InheritedResources
-  VERSION = '1.13.0'.freeze
+  VERSION = '2.1.0'.freeze
 end

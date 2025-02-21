@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 # Whenever base is required load the dumb responder since it's used inside actions.
-require 'inherited_resources/blank_slate'
+require_relative 'blank_slate'
 
 module InheritedResources
   # Base helpers for InheritedResource work. Some methods here can be overwritten
@@ -54,7 +56,7 @@ module InheritedResources
 
       # Responsible for saving the resource on :create method. Overwriting this
       # allow you to control the way resource is saved. Let's say you have a
-      # PassworsController who is responsible for finding an user by email and
+      # PasswordsController who is responsible for finding an user by email and
       # sent password instructions for him. Instead of overwriting the entire
       # :create method, you could do something:
       #
@@ -133,7 +135,7 @@ module InheritedResources
       end
 
       # rubocop:disable Layout/CommentIndentation
-      # See https://github.com/rubocop-hq/rubocop/issues/6450
+      # See https://github.com/rubocop/rubocop/issues/6450
       #
       # Overwrite this method to provide other interpolation options when
       # the flash message is going to be set.
@@ -215,7 +217,7 @@ module InheritedResources
       #
       def get_resource_ivar #:nodoc:
         if instance_variable_defined?(:"@#{resource_instance_name}")
-          instance_variable_get("@#{resource_instance_name}")
+          instance_variable_get(:"@#{resource_instance_name}")
         else
           nil
         end
@@ -224,14 +226,14 @@ module InheritedResources
       # Set resource ivar based on the current resource controller.
       #
       def set_resource_ivar(resource) #:nodoc:
-        instance_variable_set("@#{resource_instance_name}", resource)
+        instance_variable_set(:"@#{resource_instance_name}", resource)
       end
 
       # Get collection ivar based on the current resource controller.
       #
       def get_collection_ivar #:nodoc:
         if instance_variable_defined?(:"@#{resource_collection_name}")
-          instance_variable_get("@#{resource_collection_name}")
+          instance_variable_get(:"@#{resource_collection_name}")
         else
           nil
         end
@@ -240,7 +242,7 @@ module InheritedResources
       # Set collection ivar based on the current resource controller.
       #
       def set_collection_ivar(collection) #:nodoc:
-        instance_variable_set("@#{resource_collection_name}", collection)
+        instance_variable_set(:"@#{resource_collection_name}", collection)
       end
 
       # Used to allow to specify success and failure within just one block:
@@ -295,7 +297,7 @@ module InheritedResources
         if respond_to? :show
           url = resource_url rescue nil
         end
-        url ||= smart_collection_url
+        url || smart_collection_url
       end
 
       # URL to redirect to when redirect implies collection url.
@@ -307,7 +309,7 @@ module InheritedResources
         if respond_to? :parent, true
           url ||= parent_url rescue nil
         end
-        url ||= root_url rescue nil
+        url || root_url rescue nil
       end
 
       # memoize the extraction of attributes from params
@@ -368,7 +370,7 @@ module InheritedResources
         self.resources_configuration[:self][:role].present?
       end
 
-      # getting role for mass-asignment
+      # getting role for mass-assignment
       def as_role
         { as: self.resources_configuration[:self][:role] }
       end

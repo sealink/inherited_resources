@@ -1,22 +1,37 @@
----
-
 version: 2
-
 updates:
-  - package-ecosystem: bundler
+  - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: daily
-    versioning-strategy: lockfile-only
-
+    groups:
+      github_actions:
+        patterns:
+          - "*"
   - package-ecosystem: bundler
-    directory: /test/rails_60
+    directory: /
     schedule:
-      interval: daily
+      interval: monthly
     versioning-strategy: lockfile-only
-
+    groups:
+      rails_default:
+        patterns:
+          - "*"
   - package-ecosystem: bundler
-    directory: /test/rails_52
+    directory: /gemfiles/rails_61
     schedule:
-      interval: daily
+      interval: monthly
     versioning-strategy: lockfile-only
+    groups:
+      rails_61:
+        patterns:
+          - "*"
+  - package-ecosystem: bundler
+    directory: /gemfiles/rails_70
+    schedule:
+      interval: monthly
+    versioning-strategy: lockfile-only
+    groups:
+      rails_70:
+        patterns:
+          - "*"

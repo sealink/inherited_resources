@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 # This is here because responders don't require it.
 require 'rails/engine'
 require 'responders'
-require 'inherited_resources/engine'
-require 'inherited_resources/blank_slate'
-require 'inherited_resources/responder'
+
+require_relative 'inherited_resources/engine'
+require_relative 'inherited_resources/blank_slate'
+require_relative 'inherited_resources/responder'
 
 module InheritedResources
   ACTIONS = [ :index, :show, :new, :edit, :create, :update, :destroy ] unless self.const_defined?(:ACTIONS)
@@ -23,18 +26,19 @@ module InheritedResources
   def self.flash_keys=(array)
     Responders::FlashResponder.flash_keys = array
   end
+
+  # Inherit from a different controller. This only has an effect if changed
+  # before InheritedResources::Base is loaded, e.g. in a rails initializer.
+  mattr_accessor(:parent_controller) { '::ApplicationController' }
 end
 
-ActiveSupport.on_load(:action_controller) do
-  # We can remove this check and change to `on_load(:action_controller_base)` in Rails 5.2.
-  if self == ActionController::Base
-    # If you cannot inherit from InheritedResources::Base you can call
-    # inherit_resources in your controller to have all the required modules and
-    # funcionality included.
-    def self.inherit_resources
-      InheritedResources::Base.inherit_resources(self)
-      initialize_resources_class_accessors!
-      create_resources_url_helpers!
-    end
+ActiveSupport.on_load(:action_controller_base) do
+  # If you cannot inherit from InheritedResources::Base you can call
+  # inherit_resources in your controller to have all the required modules and
+  # functionality included.
+  def self.inherit_resources
+    InheritedResources::Base.inherit_resources(self)
+    initialize_resources_class_accessors!
+    create_resources_url_helpers!
   end
 end

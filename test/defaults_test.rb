@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'test_helper'
 
 class Malarz
@@ -30,38 +31,52 @@ class DefaultsTest < ActionController::TestCase
   def test_expose_all_painters_as_instance_variable
     Malarz.expects(:scoped).returns([mock_painter])
     get :index
+
+    assert_equal [mock_painter], assigns(:malarze)
+  end
+
+  def test_collection_instance_variable_should_not_be_set_if_already_defined
+    @controller.instance_variable_set(:@malarze, [mock_painter])
+    Malarz.expects(:scoped).never
+    get :index
+
     assert_equal [mock_painter], assigns(:malarze)
   end
 
   def test_expose_the_requested_painter_on_show
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
     get :show, params: { id: 'forty_two' }
+
     assert_equal mock_painter, assigns(:malarz)
   end
 
   def test_expose_a_new_painter
     Malarz.expects(:new).returns(mock_painter)
     get :new
+
     assert_equal mock_painter, assigns(:malarz)
   end
 
   def test_expose_the_requested_painter_on_edit
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
     get :edit, params: { id: 'forty_two' }
+
     assert_response :success
     assert_equal mock_painter, assigns(:malarz)
   end
 
   def test_expose_a_newly_create_painter_when_saved_with_success
-    Malarz.expects(:new).with({'these' => 'params'}).returns(mock_painter(save: true))
+    Malarz.expects(:new).with(build_parameters({'these' => 'params'})).returns(mock_painter(save: true))
     post :create, params: { malarz: {these: 'params'} }
+
     assert_equal mock_painter, assigns(:malarz)
   end
 
   def test_update_the_requested_object
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
-    mock_painter.expects(:update).with({'these' => 'params'}).returns(true)
+    mock_painter.expects(:update).with(build_parameters({'these' => 'params'})).returns(true)
     put :update, params: { id: 'forty_two', malarz: {these: 'params'} }
+
     assert_equal mock_painter, assigns(:malarz)
   end
 
@@ -69,6 +84,7 @@ class DefaultsTest < ActionController::TestCase
     Malarz.expects(:find_by_slug).with('forty_two').returns(mock_painter)
     mock_painter.expects(:destroy)
     delete :destroy, params: { id: 'forty_two' }
+
     assert_equal mock_painter, assigns(:malarz)
   end
 
@@ -76,6 +92,10 @@ class DefaultsTest < ActionController::TestCase
 
     def mock_painter(stubs={})
       @mock_painter ||= mock(stubs)
+    end
+
+    def build_parameters(hash)
+      ActionController::Parameters.new(hash)
     end
 end
 
@@ -105,38 +125,44 @@ class DefaultsNamespaceTest < ActionController::TestCase
   def test_expose_all_lecturers_as_instance_variable
     Lecturer.expects(:scoped).returns([mock_lecturer])
     get :index
+
     assert_equal [mock_lecturer], assigns(:lecturers)
   end
 
   def test_expose_the_requested_lecturer_on_show
     Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
     get :show, params: { id: 'forty_two' }
+
     assert_equal mock_lecturer, assigns(:lecturer)
   end
 
   def test_expose_a_new_lecturer
     Lecturer.expects(:new).returns(mock_lecturer)
     get :new
+
     assert_equal mock_lecturer, assigns(:lecturer)
   end
 
   def test_expose_the_requested_lecturer_on_edit
     Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
     get :edit, params: { id: 'forty_two' }
+
     assert_response :success
     assert_equal mock_lecturer, assigns(:lecturer)
   end
 
   def test_expose_a_newly_create_lecturer_when_saved_with_success
-    Lecturer.expects(:new).with({'these' => 'params'}).returns(mock_lecturer(save: true))
+    Lecturer.expects(:new).with(build_parameters({'these' => 'params'})).returns(mock_lecturer(save: true))
     post :create, params: { lecturer: {these: 'params'} }
+
     assert_equal mock_lecturer, assigns(:lecturer)
   end
 
   def test_update_the_lecturer
     Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
-    mock_lecturer.expects(:update).with({'these' => 'params'}).returns(true)
+    mock_lecturer.expects(:update).with(build_parameters({'these' => 'params'})).returns(true)
     put :update, params: { id: 'forty_two', lecturer: {these: 'params'} }
+
     assert_equal mock_lecturer, assigns(:lecturer)
   end
 
@@ -144,6 +170,7 @@ class DefaultsNamespaceTest < ActionController::TestCase
     Lecturer.expects(:find_by_slug).with('forty_two').returns(mock_lecturer)
     mock_lecturer.expects(:destroy)
     delete :destroy, params: { id: 'forty_two' }
+
     assert_equal mock_lecturer, assigns(:lecturer)
   end
 
@@ -151,6 +178,10 @@ class DefaultsNamespaceTest < ActionController::TestCase
 
     def mock_lecturer(stubs={})
       @mock_lecturer ||= mock(stubs)
+    end
+
+    def build_parameters(hash)
+      ActionController::Parameters.new(hash)
     end
 end
 
@@ -169,6 +200,7 @@ class NamespacedModelForNamespacedController < ActionController::TestCase
   def test_that_it_picked_the_namespaced_model
     # make public so we can test it
     Admin::GroupsController.send(:public, :resource_class)
+
     assert_equal Admin::Group, @controller.resource_class
   end
 end
@@ -185,6 +217,7 @@ class TwoPartNameModelForNamespacedController < ActionController::TestCase
   def test_that_it_picked_the_camelcased_model
     # make public so we can test it
     Admin::RolesController.send(:public, :resource_class)
+
     assert_equal AdminRole, @controller.resource_class
   end
 end
@@ -199,12 +232,14 @@ class AnotherTwoPartNameModelForNamespacedController < ActionController::TestCas
   def test_that_it_picked_the_camelcased_model
     # make public so we can test it
     Admin::UsersController.send(:public, :resource_class)
+
     assert_equal User, @controller.resource_class
   end
 
   def test_that_it_got_the_request_params_right
     # make public so we can test it
     Admin::UsersController.send(:public, :resources_configuration)
+
     assert_equal 'user', @controller.resources_configuration[:self][:request_name]
   end
 end
