@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'test_helper'
 
 # This test file is instead to test the how controller flow and actions
@@ -70,6 +71,7 @@ class NestedSingletonTest < ActionController::TestCase
     Party.expects(:find).with('37').returns(mock_party)
     mock_party.expects(:venue).returns(mock_venue)
     get :show, params: { party_id: '37' }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
   ensure
@@ -85,6 +87,7 @@ class NestedSingletonTest < ActionController::TestCase
     mock_venue.expects(:address).returns(mock_address)
     mock_address.expects(:geolocation).returns(mock_geolocation)
     get :show, params: { party_id: '37' }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
     assert_equal mock_address, assigns(:address)
@@ -98,6 +101,7 @@ class NestedSingletonTest < ActionController::TestCase
     mock_party.expects(:venue).returns(mock_venue)
     mock_venue.expects(:build_address).returns(mock_address)
     get :new, params: { party_id: '37' }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
     assert_equal mock_address, assigns(:address)
@@ -108,6 +112,7 @@ class NestedSingletonTest < ActionController::TestCase
     mock_party.expects(:venue).returns(mock_venue)
     mock_venue.expects(:address).returns(mock_address)
     get :edit, params: { party_id: '37' }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
     assert_equal mock_address, assigns(:address)
@@ -119,6 +124,7 @@ class NestedSingletonTest < ActionController::TestCase
     mock_party.expects(:venue).returns(mock_venue)
     mock_venue.expects(:address).returns(mock_address)
     get :show, params: { party_id: '37' }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
     assert_equal mock_address, assigns(:address)
@@ -128,8 +134,9 @@ class NestedSingletonTest < ActionController::TestCase
   def test_expose_a_newly_create_address_on_create
     Party.expects(:find).with('37').returns(mock_party)
     mock_party.expects(:venue).returns(mock_venue)
-    mock_venue.expects(:build_address).with({'these' => 'params'}).returns(mock_address(save: true))
+    mock_venue.expects(:build_address).with(build_parameters({'these' => 'params'})).returns(mock_address(save: true))
     post :create, params: { party_id: '37', address: {these: 'params'} }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
     assert_equal mock_address, assigns(:address)
@@ -138,8 +145,9 @@ class NestedSingletonTest < ActionController::TestCase
   def test_update_the_requested_object_on_update
     Party.expects(:find).with('37').returns(mock_party)
     mock_party.expects(:venue).returns(mock_venue(address: mock_address))
-    mock_address.expects(:update).with({'these' => 'params'}).returns(mock_address(save: true))
+    mock_address.expects(:update).with(build_parameters({'these' => 'params'})).returns(mock_address(save: true))
     post :update, params: { party_id: '37', address: {these: 'params'} }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
     assert_equal mock_address, assigns(:address)
@@ -152,6 +160,7 @@ class NestedSingletonTest < ActionController::TestCase
     @controller.expects(:parent_url).returns('http://test.host/')
     mock_address.expects(:destroy)
     delete :destroy, params: { party_id: '37' }
+
     assert_equal mock_party, assigns(:party)
     assert_equal mock_venue, assigns(:venue)
     assert_equal mock_address, assigns(:address)
@@ -173,5 +182,9 @@ class NestedSingletonTest < ActionController::TestCase
 
     def mock_geolocation(stubs={})
       @mock_geolocation ||= mock('geolocation', stubs)
+    end
+
+    def build_parameters(hash)
+      ActionController::Parameters.new(hash)
     end
 end

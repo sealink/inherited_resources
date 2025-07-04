@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module InheritedResources
   # Shallow provides a functionality that goes on pair with Rails' shallow.
   # It is very similar to "optional" but it actually finds all the parents
@@ -33,7 +35,7 @@ module InheritedResources
       end
 
       def load_parents(instance, parent_symbols)
-        parent_symbols.reverse.each do |parent|
+        parent_symbols.reverse_each do |parent|
           instance = instance.send(parent)
           config   = resources_configuration[parent]
           params[config[:param]] = instance.to_param

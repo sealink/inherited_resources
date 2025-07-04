@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module InheritedResources
   module ClassMethods
 
@@ -25,7 +27,7 @@ module InheritedResources
       #
       # * <tt>:route_instance_name</tt> - The name of the singular route. Defaults to :instance_name.
       #
-      # * <tt>:route_prefix</tt> - The route prefix which is automically set in namespaced
+      # * <tt>:route_prefix</tt> - The route prefix which is automatically set in namespaced
       #                            controllers. Default to :admin on Admin::ProjectsController.
       #
       # * <tt>:resource_url_helper_name</tt> - The route url helper method name. Defaults to :route
@@ -61,7 +63,7 @@ module InheritedResources
           config[:request_name] = begin
             request_name = self.resource_class
             request_name = request_name.model_name.param_key if request_name.respond_to?(:model_name)
-            request_name.to_s.underscore.gsub('/', '_')
+            request_name.to_s.underscore.tr('/', '_')
           end
           options.delete(:resource_class) and options.delete(:class_name)
         end
@@ -73,7 +75,7 @@ module InheritedResources
         create_resources_url_helpers!
       end
 
-      # Defines wich actions will be inherited from the inherited controller.
+      # Defines which actions will be inherited from the inherited controller.
       # Syntax is borrowed from resource_controller.
       #
       #   actions :index, :show, :edit
@@ -223,7 +225,7 @@ module InheritedResources
           config[:finder]          = finder || :find
         end
 
-        if block_given?
+        if block
           class_eval(&block)
         else
           create_resources_url_helpers!
@@ -235,7 +237,7 @@ module InheritedResources
       #
       def polymorphic_belongs_to(*symbols, &block)
         options = symbols.extract_options!
-        options.merge!(polymorphic: true)
+        options[:polymorphic] = true
         belongs_to(*symbols, options, &block)
       end
 
@@ -243,7 +245,7 @@ module InheritedResources
       #
       def singleton_belongs_to(*symbols, &block)
         options = symbols.extract_options!
-        options.merge!(singleton: true)
+        options[:singleton] = true
         belongs_to(*symbols, options, &block)
       end
 
@@ -251,7 +253,7 @@ module InheritedResources
       #
       def optional_belongs_to(*symbols, &block)
         options = symbols.extract_options!
-        options.merge!(optional: true)
+        options[:optional] = true
         belongs_to(*symbols, options, &block)
       end
 
@@ -392,7 +394,7 @@ module InheritedResources
         # Forum::Thread#create will properly pick up the request parameter
         # which will be forum_thread, and not thread
         # Additionally make this work orthogonally with instance_name
-        config[:request_name] = self.resource_class.to_s.underscore.gsub('/', '_')
+        config[:request_name] = self.resource_class.to_s.underscore.tr('/', '_')
 
         # Initialize polymorphic, singleton, scopes and belongs_to parameters
         polymorphic = self.resources_configuration[:polymorphic] || { symbols: [], optional: false }
