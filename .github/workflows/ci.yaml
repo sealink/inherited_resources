@@ -30,7 +30,7 @@ jobs:
           - ruby: "3.4"
             rails: rails_70
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure bundler (default)
         run: |
           echo "BUNDLE_GEMFILE=Gemfile" >> "$GITHUB_ENV"
@@ -49,7 +49,7 @@ jobs:
         run: |
           bundle exec rake test TESTOPTS="--verbose"
           mv coverage/coverage.xml coverage/coverage-ruby-${{ matrix.ruby }}-${{ matrix.rails }}.xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: coverage-ruby-${{ matrix.ruby }}-${{ matrix.rails }}
           path: coverage
@@ -61,8 +61,8 @@ jobs:
     needs:
       - test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v6
         with:
           pattern: coverage-ruby-*
           path: coverage
